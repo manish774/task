@@ -1,83 +1,101 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react'
-import ProjectCard from '../components/ProjectCard'
-
-function debounce(fn, delay) {
-  let t
-  return (...args) => {
-    clearTimeout(t)
-    t = setTimeout(() => fn(...args), delay)
-  }
-}
+import React, { useEffect, useMemo, useState } from "react";
+import ProjectCard from "../components/ProjectCard";
 
 export default function Projects() {
-  const [projects, setProjects] = useState([])
-  const [query, setQuery] = useState('')
-  const [status, setStatus] = useState('All')
-  const [sortBy, setSortBy] = useState('lastUpdated')
-  const pendingQueryRef = useRef(query)
+  const [projects, setProjects] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [status, setStatus] = useState("All");
+  const [sortBy, setSortBy] = useState("updated");
 
   useEffect(() => {
-    fetch('/data/projects.json').then(r => r.json()).then(d => setProjects(d.projects || []))
-  }, [])
+    async function load() {
+      // try project locations
+      const projectUrls = ["/projects.json", "/data/projects.json"];
+      for (const u of projectUrls) {
+        try {
+          const r = await fetch(u);
+          if (r.ok) {
+            const data = await r.json();
+            setProjects(data);
+            break;
+          }
+        } catch (e) {}
+      }
 
-  // debounced query setter
-  const setDebouncedQuery = useMemo(() => debounce(q => setQuery(q), 300), [])
+      // try common task files (optional)
+      const taskUrls = ["/tasks.json", "/data/tasks.json"];
+      for (const u of taskUrls) {
+        try {
+          const r = await fetch(u);
+          if (r.ok) {
+            const data = await r.json();
+            setTasks(data);
+            break;
+          }
+        } catch (e) {}
+      }
+    }
+    load();
+  }, []);
 
-  function handleSearch(e) {
-    pendingQueryRef.current = e.target.value
-    setDebouncedQuery(e.target.value)
-  }
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
 
-  const filtered = useMemo(() => {
-    let list = [...projects]
-    const q = query.trim().toLowerCase()
-    if (q) {
-      list = list.filter(p => p.name.toLowerCase().includes(q))
-    }
-    if (status !== 'All') {
-      list = list.filter(p => p.status === status)
-    }
-    if (sortBy === 'lastUpdated') {
-      list.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated))
-    } else {
-      list.sort((a, b) => ( (b.tasks?.length || 0) - (a.tasks?.length || 0) ))
-    }
-    return list
-  }, [projects, query, status, sortBy])
+  const projectsWithCounts = useMemo(() => {
+    return projects.map((p) => {
+      // prefer openTasks field if present in projects.json
+      const openFromField = typeof p.openTasks === "number" ? p.openTasks : undefined;
+      const openFromTasks = tasks.filter((t) => t.projectId === p.id && t.status !== "Done").length;
+      const open = openFromField !== undefined ? openFromField : openFromTasks;
+      return { ...p, open };
+    });
+  }, [projects, tasks]);
+
+  const filtered = projectsWithCounts.filter((p) => {
+    if (status !== "All" && p.status !== status) return false;
+    if (debounced && !p.name.toLowerCase().includes(debounced.toLowerCase())) return false;
+    return true;
+  });
+
+  const sorted = filtered.sort((a, b) => {
+    if (sortBy === "updated") return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+    return b.open - a.open;
+  });
 
   return (
     <section>
       <h2>Projects</h2>
-
-      <div className="controls">
+      <form aria-label="filters" className="filters" onSubmit={(e) => e.preventDefault()}>
         <label>
           Search
-          <input aria-label="Search projects" defaultValue={pendingQueryRef.current} onChange={handleSearch} />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Project name" />
         </label>
-
         <label>
           Status
-          <select value={status} onChange={e => setStatus(e.target.value)}>
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
             <option>All</option>
             <option>Active</option>
             <option>Paused</option>
             <option>Completed</option>
           </select>
         </label>
-
         <label>
           Sort by
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="lastUpdated">Last Updated</option>
-            <option value="openTasks">Open Tasks</option>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="updated">Last updated</option>
+            <option value="open">Open tasks</option>
           </select>
         </label>
-      </div>
+      </form>
 
-      <div className="grid" role="list">
-        {filtered.map(p => <ProjectCard key={p.id} project={p} />)}
-        {filtered.length === 0 && <p>No projects found.</p>}
+      <div className="grid">
+        {sorted.map((p) => <ProjectCard key={p.id} project={p} openTasks={p.open} />)}
+        {sorted.length === 0 && <p>No projects match.</p>}
       </div>
     </section>
-  )
+  );
 }

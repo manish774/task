@@ -1,63 +1,23 @@
-{
-  "projects": [
-    {
-      "id": "1",
-      "name": "Website Redesign",
-      "owner": "Alice",
-      "status": "Active",
-      "lastUpdated": "2025-10-15T10:12:00Z",
-      "tasks": [
-        {
-          "id": "t1",
-          "title": "Wireframes",
-          "status": "Todo",
-          "priority": "High",
-          "assignee": "Bob",
-          "dueDate": "2025-11-01"
-        },
-        {
-          "id": "t2",
-          "title": "Prototype",
-          "status": "In Progress",
-          "priority": "Medium",
-          "assignee": "Charlie",
-          "dueDate": "2025-11-10"
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "name": "Mobile App",
-      "owner": "Bob",
-      "status": "Paused",
-      "lastUpdated": "2025-09-20T08:00:00Z",
-      "tasks": [
-        {
-          "id": "t3",
-          "title": "Auth Flow",
-          "status": "Todo",
-          "priority": "High",
-          "assignee": "Dana",
-          "dueDate": "2025-12-01"
-        }
-      ]
-    },
-    {
-      "id": "3",
-      "name": "Marketing Campaign",
-      "owner": "Eve",
-      "status": "Completed",
-      "lastUpdated": "2025-08-05T12:00:00Z",
-      "tasks": [
-        {
-          "id": "t4",
-          "title": "Copywriting",
-          "status": "Done",
-          "priority": "Low",
-          "assignee": "Frank",
-          "dueDate": "2025-07-20"
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "p1",
+    "name": "Website Redesign",
+    "owner": "Alice",
+    "status": "Active",
+    "lastUpdated": "2025-10-20T12:00:00Z"
+  },
+  {
+    "id": "p2",
+    "name": "Mobile App",
+    "owner": "Bob",
+    "status": "Paused",
+    "lastUpdated": "2025-09-30T08:30:00Z"
+  },
+  {
+    "id": "p3",
+    "name": "Marketing Campaign",
+    "owner": "Carol",
+    "status": "Completed",
+    "lastUpdated": "2025-08-15T09:00:00Z"
+  }
+]

@@ -1,22 +1,20 @@
-# Projects Dashboard (Vite + React)
+# Project Dashboard
 
 Setup
 
-1. npm install
-2. npm run dev
-3. npm run test
+- npm i
+- npm run dev
+- npm run test
 
 Features implemented (MVP)
 
-- Routing: /, /projects, /projects/:id
-- Projects list with debounced search, status filter, sort
-- Project detail showing tasks, toggle status, add task (title required)
-- Dark/light theme toggle persisted in localStorage
-- Basic accessibility: labeled inputs, visible focus outlines
-- Two tests for filtering and form validation (Vitest + RTL)
+- Routes: /, /projects, /projects/:id
+- Projects list: search (debounced), filter by status, sort by last updated or open tasks
+- Project detail: view tasks, toggle task status, add task (title required)
+- Dark mode with persistence (localStorage)
+- Basic accessibility: labeled inputs, focus outlines
 
-Trade-offs / Notes
+Trade-offs / notes
 
-- No backend; mock data served from public/data/projects.json
-- State is in-memory; page refresh resets task additions
-- Styling is simple CSS tokens rather than full Tailwind for speed
+- No backend: data fetched from /public/data JSON; new tasks are local-only.
+- Minimal styling without Tailwind for simplicity.
